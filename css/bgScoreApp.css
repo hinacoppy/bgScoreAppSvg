@@ -1,0 +1,137 @@
+/* bgscore.css ---------------------------------------------- */
+/* designed by (C)hinacoppy 2019 -- 2026                      */
+
+/* document outline ----------------------------------------- */
+*{
+  user-select:none;
+}
+input,select{
+  font-size:100%;
+}
+html{
+  height:100vmin;
+  /*overflow:hidden;*/
+  overscroll-behavior:none; /* バウンススクロールを抑止 */
+}
+body{
+  margin:0;
+  padding:0;
+  min-height:100vmin;
+  height:100vmin;
+  font-family:'Arial', 'Meiryo UI';
+  background-color:#efe;
+}
+.article{
+  /* 子要素(設定画面)を水平・垂直方向の中央揃え */
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+}
+@media screen and (orientation:portrait) {
+.article{ /* 縦画面の時は横向きに表示し、横画面にするよう促す */
+  width:100vh;
+  height:100vw;
+  margin:-100vw 0 100vh;
+  transform:rotate(90deg);
+  transform-origin:left bottom;
+}}
+
+/* Grid Layout settings ------------------------------------- */
+/* 横画面基準の相対サイズにし、レスポンシブ対応可能にしておく */
+#mainwindow{
+  display:grid; /* Grid Layout でコンテンツを配置 */
+  grid-template-columns:40vmax 20vmax 40vmax;
+  grid-template-rows:40vmin 40vmin 20vmin;
+  grid-template-areas:
+     'score1 matchinfo    score2'
+     'score1 crawfordinfo score2'
+     'score1 settingbtn   score2';
+  align-items:center; /* 子アイテムはデフォで上下左右に中央揃え */
+  justify-items:center;
+}
+#score1{
+  grid-area:score1;
+}
+#score2{
+  grid-area:score2;
+}
+#matchinfo{
+  grid-area:matchinfo;
+}
+#crawfordinfo{
+  grid-area:crawfordinfo;
+  align-self:start; /* matchinfoに寄せて上詰め */
+}
+#settingbtn{
+  grid-area:settingbtn;
+  align-self:start; /* ボタン下に隙間を空けるため上詰め */
+}
+#minusbtn1{
+  grid-area:score1;
+}
+#minusbtn2{
+  grid-area:score2;
+}
+/* Contents decorations ------------------------------------- */
+#matchinfo{
+  width:18vmax;
+  height:30vmin;
+  display: flex;
+  justify-content: center; /* 中央寄せ */
+  align-items: center;
+  border-radius:3vmax;
+  background-color:#3fa;
+}
+#crawfordinfo{
+  font-size:3vmax;
+  text-align:center;
+}
+.oparationbtn{
+  padding:2vmin 2vmax;
+  font-size:2vmax;
+  color:#29f;
+  border:3px solid;
+  border-radius:2vmax;
+  background-color:#bef;
+}
+svg{
+  padding:5px;
+}
+.scorecontainer{
+  width:38vmax;
+  height:96vmin;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  border-radius:8vmax;
+  background-color:#bfc;
+}
+.minusbtn{
+  width:10vmin;
+  height:10vmin;
+  justify-self:end; /* 右下 */
+  align-self:end;
+  margin:0 7vmin 7vmin 0;
+  border-radius:50%; /* 正円 */
+  border:none;
+  background-color:#3fa;
+}
+/* Setting Window decorations ------------------------------------- */
+#settingwindow{
+  position:absolute;
+  top:0;
+  margin-top:5vmin;
+  padding:2vmin 2vmax;
+  font-size:2vmax;
+  text-align:center;
+  border:3px solid #33f;
+  background-color:#dff;
+  display: none;
+}
+.settingtitle{
+  padding:2vmin 2vmax;
+  font-size:3vmax;
+  color:#fff;
+  background-color:#29f;
+}
