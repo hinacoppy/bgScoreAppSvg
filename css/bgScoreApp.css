@@ -19,7 +19,7 @@ body{
   min-height:100vmin;
   height:100vmin;
   font-family:'Arial', 'Meiryo UI';
-  background-color:#efe;
+  background-color:var(--body-bg-color);
 }
 .article{
   /* 子要素(設定画面)を水平・垂直方向の中央揃え */
@@ -81,7 +81,7 @@ body{
   justify-content: center; /* 中央寄せ */
   align-items: center;
   border-radius:3vmax;
-  background-color:#3fa;
+  background-color:var(--matchinfo);
 }
 #crawfordinfo{
   font-size:3vmax;
@@ -90,10 +90,10 @@ body{
 .oparationbtn{
   padding:2vmin 2vmax;
   font-size:2vmax;
-  color:#29f;
+  color:var(--btn-color);
   border:3px solid;
   border-radius:2vmax;
-  background-color:#bef;
+  background-color:var(--btn-bg);
 }
 svg{
   padding:5px;
@@ -104,8 +104,8 @@ svg{
   display:flex;
   justify-content:center;
   align-items:center;
-  border-radius:8vmax;
-  background-color:#bfc;
+  border-radius:6vmax;
+  background-color:var(--scorecontainer);
 }
 .minusbtn{
   width:10vmin;
@@ -115,7 +115,7 @@ svg{
   margin:0 7vmin 7vmin 0;
   border-radius:50%; /* 正円 */
   border:none;
-  background-color:#3fa;
+  background-color:var(--minusbtn);
 }
 /* Setting Window decorations ------------------------------------- */
 #settingwindow{
@@ -125,13 +125,34 @@ svg{
   padding:2vmin 2vmax;
   font-size:2vmax;
   text-align:center;
-  border:3px solid #33f;
-  background-color:#dff;
+  border:3px solid var(--setting-frame);
+  background-color:var(--setting-bg-color);
   display: none;
 }
 .settingtitle{
   padding:2vmin 2vmax;
   font-size:3vmax;
-  color:#fff;
-  background-color:#29f;
+  color:var(--setting-title);
+  background-color:var(--setting-title-bg);
+}
+/* Theme Color Definition ------------------------------------- */
+:root{
+  --btn-color:       #29f;
+  --btn-bg:          #bef;
+  --setting-bg-color:#dff;
+  --setting-frame:   #33f;
+  --setting-title:   #fff;
+  --setting-title-bg:#29f;
+}
+.sevensegment{
+  --body-bg-color:   #efe;
+  --scorecontainer:  #bfc;
+  --minusbtn:        #3fa;
+  --matchinfo:       #3fa;
+}
+.rectangle{
+  --body-bg-color:   #fec;
+  --scorecontainer:  #fc7;
+  --minusbtn:        #fa0;
+  --matchinfo:       #fa0;
 }

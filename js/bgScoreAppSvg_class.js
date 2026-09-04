@@ -13,8 +13,21 @@ class bgScoreAppSvg {
     this.sgvfillcolor = "#036";
     this.settingWindowFlag = false;
     this.settingVars = {}; //設定内容を保持するオブジェクト
+    this.applyUrlParams();
     this.setEventHandler();
     this.resetScore();
+    this.setColorTheme();
+  }
+
+  //起動オプション(URLクエリパラメータ)で表示形式を指定する
+  //例: ?f=rectangle / ?f=7segment (未指定・不正値の場合はHTML側のデフォルト(7segment)のまま)
+  applyUrlParams() {
+    const params = new URLSearchParams(location.search);
+    const fonttypeMap = { "7segment": "7seg", rectangle: "rect" };
+    const f = fonttypeMap[params.get("f")];
+    if (f) {
+      document.querySelector("#fonttype").value = f;
+    }
   }
 
   setEventHandler() {
@@ -39,6 +52,7 @@ class bgScoreAppSvg {
     applybtn.addEventListener("click", () => {
       this.resetScore();
       this.showHideSettingPanel(false);
+      this.setColorTheme(); //fonttypeの設定に従い色を変える
     });
 
     //設定画面の[CANCEL]ボタンがクリックされたとき
@@ -56,6 +70,14 @@ class bgScoreAppSvg {
         this.saveSettingVars(); //元の値を覚えておく
       });
     }
+  }
+
+  //フォント種別に応じてスコアカードの配色を切り替える
+  setColorTheme() {
+    const fonttype = document.querySelector("#fonttype").value;
+    const add = (fonttype == "rect") ? "rectangle" : "sevensegment";
+    document.body.classList.remove("rectangle", "sevensegment");
+    document.body.classList.add(add);
   }
 
   showHideSettingPanel(showflag = true) {
