@@ -6,27 +6,27 @@
   "display": "fullscreen",
   "background_color": "#efe",
   "theme_color": "#efe",
-  "description": "バックギャモンスコアボードアプリ",
+  "description": "バックギャモンスコアボードアプリ(7セグフォント版)",
   "copyright": "(C)hinacoppy 2026",
   "orientation": "landscape",
   "icons": [{
-    "src": "icon/favicon.ico",
+    "src": "icon/7seg/favicon.ico",
     "sizes": "48x48",
     "type": "image/ico"
   }, {
-    "src": "icon/android-chrome-96x96.png",
+    "src": "icon/7seg/android-chrome-96x96.png",
     "sizes": "96x96",
     "type": "image/png"
   }, {
-    "src": "icon/android-chrome-192x192.png",
+    "src": "icon/7seg/android-chrome-192x192.png",
     "sizes": "192x192",
     "type": "image/png"
   }, {
-    "src": "icon/android-chrome-512x512.png",
+    "src": "icon/7seg/android-chrome-512x512.png",
     "sizes": "512x512",
     "type": "image/png"
   }, {
-    "src": "icon/apple-touch-icon.png",
+    "src": "icon/7seg/apple-touch-icon.png",
     "sizes": "180x180",
     "type": "image/png"
   }],
