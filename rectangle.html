@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="icon/rect/apple-touch-icon.png" />
   <title>bgScoreApp</title>
 </head>
-<body>
+<body class="rectangle">
   <article class="article">
    <section id="mainwindow">
     <div id="score1" class="scorecontainer"></div>
@@ -54,7 +54,9 @@
      Font type:
      <select id="fonttype" name="fonttype">
       <option value="7seg">7segment</option>
-      <option value="rect" selected>rectangle</option>
+      <option value="rect" selected>Rectangle</option>
+      <option value="dot">DotMatrix</option>
+      <option value="flip">FlipFont</option>
      </select>
     </p>
     <p>
@@ -73,7 +75,7 @@
 
 <script src="js/bgScoreAppSvg_class.js"></script>
 <script>
-  const bgscoreapp = new bgScoreAppSvg();
+  const bgscoreapp = new bgScoreAppSvg("rect");
 </script>
 <script src="/js/start-serviceWorker.js"></script>
 </body>
