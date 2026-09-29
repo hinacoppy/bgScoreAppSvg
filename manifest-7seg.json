@@ -1,7 +1,7 @@
 {
   "name": "BG Score Board App",
   "short_name": "bgScoreApp",
-  "start_url": "/bgScoreAppSvg/index.html",
+  "start_url": "/bgScoreAppSvg/7segment.html",
   "scope": "/bgScoreAppSvg/",
   "display": "fullscreen",
   "background_color": "#efe",

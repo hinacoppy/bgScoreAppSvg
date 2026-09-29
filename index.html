@@ -1,80 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
-  <meta name="description" content="Backgammon Score Board App" />
-  <meta name="author" content="(C)hinacoppy 2026" />
-  <link rel="manifest" href="manifest-7seg.json" />
-  <link rel="stylesheet" href="css/bgScoreApp.css" />
-  <link rel="icon" href="icon/7seg/favicon.ico" />
-  <link rel="apple-touch-icon" href="icon/7seg/apple-touch-icon.png" />
-  <title>bgScoreApp</title>
+<meta charset="UTF-8">
+<meta name="author" content="(C)hinacoppy 2026">
+<meta http-equiv="Refresh" content="0;URL=7segment.html">
+<title>bgScoreApp</title>
 </head>
-<body>
-  <article class="article">
-   <section id="mainwindow">
-    <div id="score1" class="scorecontainer"></div>
-    <div id="score2" class="scorecontainer"></div>
-    <button id="minusbtn1" class="minusbtn"></button>
-    <button id="minusbtn2" class="minusbtn"></button>
-
-    <div id="matchinfo"></div>
-    <div id="crawfordinfo"></div>
-    <button id="settingbtn" class="oparationbtn">SETTINGS</button>
-   </section>
-
-   <!-- 設定画面 -->
-   <aside id="settingwindow" class="setting hide">
-    <div class="settingtitle">### Backgammon Score board App Settings ###</div>
-    <p>
-     Match length:
-     <select id="matchlength" name="matchlength">
-      <option value="0">$</option>
-      <option value="1">1</option>
-      <option value="2">2</option>
-      <option value="3">3</option>
-      <option value="5" selected>5</option>
-      <option value="7">7</option>
-      <option value="9">9</option>
-      <option value="11">11</option>
-      <option value="13">13</option>
-      <option value="15">15</option>
-      <option value="17">17</option>
-      <option value="19">19</option>
-      <option value="21">21</option>
-      <option value="23">23</option>
-      <option value="25">25</option>
-     </select>
-     ($ = Unlimited)
-    </p>
-    <p>
-     Font type:
-     <select id="fonttype" name="fonttype">
-      <option value="7seg" selected>7segment</option>
-      <option value="rect">rectangle</option>
-     </select>
-    </p>
-    <p>
-     <button id="applybtn" class="oparationbtn">RESET SCORE</button> &emsp;&emsp;&emsp;&emsp;
-     <button id="cancelbtn" class="oparationbtn">&emsp;CANCEL&emsp;</button>
-    </p>
-
-    <h3>使い方</h3>
-    <p>
-     スコア数字がぬるっとアニメーションするスコアカードアプリです。<br />
-     [RESET SCORE] をタップすると、スコアは 0 にリセットされます。<br />
-     カード右下の色違いのところをタップすれば、数字を戻すことができます。
-    </p>
-   </aside>
-  </article>
-
-<script src="js/bgScoreAppSvg_class.js"></script>
-<script>
-  const bgscoreapp = new bgScoreAppSvg();
-</script>
-<script src="/js/start-serviceWorker.js"></script>
-</body>
 </html>

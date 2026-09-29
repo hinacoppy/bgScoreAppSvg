@@ -149,10 +149,46 @@ svg{
   --scorecontainer:  #bfc;
   --minusbtn:        #3fa;
   --matchinfo:       #3fa;
+  --btn-color:       #29f;
+  --btn-bg:          #bef;
+  --setting-bg-color:#dff;
+  --setting-frame:   #33f;
+  --setting-title:   #fff;
+  --setting-title-bg:#29f;
 }
 .rectangle{
   --body-bg-color:   #fec;
   --scorecontainer:  #fc7;
   --minusbtn:        #fa0;
   --matchinfo:       #fa0;
+  --btn-color:       #29f;
+  --btn-bg:          #bef;
+  --setting-bg-color:#dff;
+  --setting-frame:   #33f;
+  --setting-title:   #fff;
+  --setting-title-bg:#29f;
+}
+.dotmatrix{
+  --body-bg-color:   #ffe5e5;
+  --scorecontainer:  #ffb3b3;
+  --minusbtn:        #f33;
+  --matchinfo:       #f33;
+  --btn-color:       #29f;
+  --btn-bg:          #bef;
+  --setting-bg-color:#dff;
+  --setting-frame:   #33f;
+  --setting-title:   #fff;
+  --setting-title-bg:#29f;
+}
+.flipfont{
+  --body-bg-color:   #f1eaff;
+  --scorecontainer:  #d9c2ff;
+  --minusbtn:        #93f;
+  --matchinfo:       #93f;
+  --btn-color:       #29f;
+  --btn-bg:          #bef;
+  --setting-bg-color:#dff;
+  --setting-frame:   #33f;
+  --setting-title:   #fff;
+  --setting-title-bg:#29f;
 }
