@@ -2,15 +2,20 @@
 // (参考) https://developer.mozilla.org/ja/docs/Web/Progressive_web_apps/Offline_Service_workers
 'use strict';
 
-const cacheName = 'bgScoreAppSvg-v20260905-4';
+const cacheName = 'bgScoreAppSvg-v20260929';
 const ORIGIN = (location.hostname == 'localhost') ? '' : location.protocol + '//' + location.hostname;
 
 const contentToCache = [
   ORIGIN + '/bgScoreAppSvg/',
   ORIGIN + '/bgScoreAppSvg/index.html',
+  ORIGIN + '/bgScoreAppSvg/7segment.html',
   ORIGIN + '/bgScoreAppSvg/rectangle.html',
+  ORIGIN + '/bgScoreAppSvg/dotmatrix.html',
+  ORIGIN + '/bgScoreAppSvg/flipfont.html',
   ORIGIN + '/bgScoreAppSvg/manifest-7seg.json',
   ORIGIN + '/bgScoreAppSvg/manifest-rect.json',
+  ORIGIN + '/bgScoreAppSvg/manifest-dot.json',
+  ORIGIN + '/bgScoreAppSvg/manifest-flip.json',
   ORIGIN + '/bgScoreAppSvg/icon/7seg/favicon.ico',
   ORIGIN + '/bgScoreAppSvg/icon/7seg/apple-touch-icon.png',
   ORIGIN + '/bgScoreAppSvg/icon/7seg/android-chrome-96x96.png',
@@ -21,6 +26,16 @@ const contentToCache = [
   ORIGIN + '/bgScoreAppSvg/icon/rect/android-chrome-96x96.png',
   ORIGIN + '/bgScoreAppSvg/icon/rect/android-chrome-192x192.png',
   ORIGIN + '/bgScoreAppSvg/icon/rect/android-chrome-512x512.png',
+  ORIGIN + '/bgScoreAppSvg/icon/dot/favicon.ico',
+  ORIGIN + '/bgScoreAppSvg/icon/dot/apple-touch-icon.png',
+  ORIGIN + '/bgScoreAppSvg/icon/dot/android-chrome-96x96.png',
+  ORIGIN + '/bgScoreAppSvg/icon/dot/android-chrome-192x192.png',
+  ORIGIN + '/bgScoreAppSvg/icon/dot/android-chrome-512x512.png',
+  ORIGIN + '/bgScoreAppSvg/icon/flip/favicon.ico',
+  ORIGIN + '/bgScoreAppSvg/icon/flip/apple-touch-icon.png',
+  ORIGIN + '/bgScoreAppSvg/icon/flip/android-chrome-96x96.png',
+  ORIGIN + '/bgScoreAppSvg/icon/flip/android-chrome-192x192.png',
+  ORIGIN + '/bgScoreAppSvg/icon/flip/android-chrome-512x512.png',
   ORIGIN + '/bgScoreAppSvg/css/bgScoreApp.css',
   ORIGIN + '/bgScoreAppSvg/js/bgScoreAppSvg_class.js',
 ];
