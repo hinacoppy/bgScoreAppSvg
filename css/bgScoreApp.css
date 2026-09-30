@@ -87,7 +87,7 @@ body{
   font-size:3vmax;
   text-align:center;
 }
-.oparationbtn{
+.operationbtn{
   padding:2vmin 2vmax;
   font-size:2vmax;
   color:var(--btn-color);
@@ -154,36 +154,42 @@ svg{
   --setting-title-bg:#29f;
 }
 .sevensegment{
+  --svg-fill-color:  #036;
   --body-bg-color:   #efe;
   --scorecontainer:  #bfc;
   --minusbtn:        #3fa;
   --matchinfo:       #3fa;
 }
 .rectangle{
+  --svg-fill-color:  #036;
   --body-bg-color:   #fec;
   --scorecontainer:  #fc7;
   --minusbtn:        #fa0;
   --matchinfo:       #fa0;
 }
 .dotmatrix{
+  --svg-fill-color:  #036;
   --body-bg-color:   #ffe5e5;
   --scorecontainer:  #ffb3b3;
   --minusbtn:        #f33;
   --matchinfo:       #f33;
 }
 .flipfont{
+  --svg-fill-color:  #036;
   --body-bg-color:   #f1eaff;
   --scorecontainer:  #d9c2ff;
   --minusbtn:        #93f;
   --matchinfo:       #93f;
 }
 .odometer{
+  --svg-fill-color:  #036;
   --body-bg-color:   #eceff1;
   --scorecontainer:  #cfd8dc;
   --minusbtn:        #809d9b;
   --matchinfo:       #809d9b;
 }
 .handwrite{
+  --svg-fill-color:  #036;
   --body-bg-color:   #d7e3f0;
   --scorecontainer:  #f0f0f0;
   --minusbtn:        #bfe0f2;
