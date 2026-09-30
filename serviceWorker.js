@@ -2,7 +2,7 @@
 // (参考) https://developer.mozilla.org/ja/docs/Web/Progressive_web_apps/Offline_Service_workers
 'use strict';
 
-const cacheName = 'bgScoreAppSvg-v20260929';
+const cacheName = 'bgScoreAppSvg-v20260930';
 const ORIGIN = (location.hostname == 'localhost') ? '' : location.protocol + '//' + location.hostname;
 
 const contentToCache = [
@@ -12,10 +12,22 @@ const contentToCache = [
   ORIGIN + '/bgScoreAppSvg/rectangle.html',
   ORIGIN + '/bgScoreAppSvg/dotmatrix.html',
   ORIGIN + '/bgScoreAppSvg/flipfont.html',
+  ORIGIN + '/bgScoreAppSvg/odometer.html',
+  ORIGIN + '/bgScoreAppSvg/handwrite.html',
+  ORIGIN + '/bgScoreAppSvg/css/bgScoreApp.css',
+  ORIGIN + '/bgScoreAppSvg/js/bgScoreAppSvg_class.js',
+  ORIGIN + '/bgScoreAppSvg/js/SevenSegment_class.js',
+  ORIGIN + '/bgScoreAppSvg/js/RectanglePolygon_class.js',
+  ORIGIN + '/bgScoreAppSvg/js/DotMatrix_class.js',
+  ORIGIN + '/bgScoreAppSvg/js/FlipFont_class.js',
+  ORIGIN + '/bgScoreAppSvg/js/Odometer_class.js',
+  ORIGIN + '/bgScoreAppSvg/js/HandWrite_class.js',
   ORIGIN + '/bgScoreAppSvg/manifest-7seg.json',
   ORIGIN + '/bgScoreAppSvg/manifest-rect.json',
   ORIGIN + '/bgScoreAppSvg/manifest-dot.json',
   ORIGIN + '/bgScoreAppSvg/manifest-flip.json',
+  ORIGIN + '/bgScoreAppSvg/manifest-odo.json',
+  ORIGIN + '/bgScoreAppSvg/manifest-hand.json',
   ORIGIN + '/bgScoreAppSvg/icon/7seg/favicon.ico',
   ORIGIN + '/bgScoreAppSvg/icon/7seg/apple-touch-icon.png',
   ORIGIN + '/bgScoreAppSvg/icon/7seg/android-chrome-96x96.png',
@@ -36,8 +48,16 @@ const contentToCache = [
   ORIGIN + '/bgScoreAppSvg/icon/flip/android-chrome-96x96.png',
   ORIGIN + '/bgScoreAppSvg/icon/flip/android-chrome-192x192.png',
   ORIGIN + '/bgScoreAppSvg/icon/flip/android-chrome-512x512.png',
-  ORIGIN + '/bgScoreAppSvg/css/bgScoreApp.css',
-  ORIGIN + '/bgScoreAppSvg/js/bgScoreAppSvg_class.js',
+  ORIGIN + '/bgScoreAppSvg/icon/odo/favicon.ico',
+  ORIGIN + '/bgScoreAppSvg/icon/odo/apple-touch-icon.png',
+  ORIGIN + '/bgScoreAppSvg/icon/odo/android-chrome-96x96.png',
+  ORIGIN + '/bgScoreAppSvg/icon/odo/android-chrome-192x192.png',
+  ORIGIN + '/bgScoreAppSvg/icon/odo/android-chrome-512x512.png',
+  ORIGIN + '/bgScoreAppSvg/icon/hand/favicon.ico',
+  ORIGIN + '/bgScoreAppSvg/icon/hand/apple-touch-icon.png',
+  ORIGIN + '/bgScoreAppSvg/icon/hand/android-chrome-96x96.png',
+  ORIGIN + '/bgScoreAppSvg/icon/hand/android-chrome-192x192.png',
+  ORIGIN + '/bgScoreAppSvg/icon/hand/android-chrome-512x512.png',
 ];
 
 self.addEventListener('install', (e) => {
