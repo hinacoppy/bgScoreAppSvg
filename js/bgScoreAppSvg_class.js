@@ -9,7 +9,6 @@ class bgScoreAppSvg {
     this.crawford = 0;
     this.cfplayer = 0;
     this.scorefontsize = "15vmax";
-    this.sgvfillcolor = "#036";
     this.settingWindowFlag = false;
     this.settingVars = {}; //設定内容を保持するオブジェクト
     this.fontWorker = this.makeFontWorker(fonttype);
@@ -86,7 +85,7 @@ class bgScoreAppSvg {
   }
 
   getFillColor() {
-    return this.sgvfillcolor;
+    return getComputedStyle(document.body).getPropertyValue("--svg-fill-color").trim();
   }
 
   showHideSettingPanel(showflag = true) {
@@ -115,23 +114,33 @@ class bgScoreAppSvg {
   }
 
   //Crawfordかどうかを判断
-  checkCrawford(player) {
-    let cfstr;
+  //player: 今回スコアを操作したプレイヤー(1 or 2)、delta: 増減値(+1 / -1 / 0)
+  //this.cfplayer: match point(matchlen-1)に先に到達したプレイヤー(0=該当なし)
+  //this.crawford: 1=Crawfordゲーム中、0=Post Crawford(または該当なし)
+  //DMP/MATCH表示中は状態を変更しない(「−」で戻したときに直前の状態へ復帰させるため)
+  checkCrawford(player, delta = 0) {
+    const mp = this.matchlen - 1; //match point
+    const [s1, s2] = [this.score[1], this.score[2]];
+    let cfstr = "";
     if (this.matchlen == 0) {
       cfstr = "";
-    } else if (this.score[1] == this.matchlen || this.score[2] == this.matchlen) {
-      cfstr = "MATCH";
-    } else if (this.score[1] == this.score[2] && this.matchlen - this.score[player] == 1) {
+    } else if (s1 >= this.matchlen || s2 >= this.matchlen) {
+      cfstr = "MATCH"; //(「==」だと99点上限まで加点したとき表示が消えるため「>=」)
+    } else if (s1 == mp && s2 == mp) {
       cfstr = "DMP";
-    } else if (this.matchlen - this.score[player] == 1 && this.crawford == 0) {
-      this.crawford = 1; this.cfplayer = player;
-      cfstr = "Crawford";
-    } else if (this.matchlen - this.score[this.cfplayer] == 1) {
-      this.crawford = 0;
-      cfstr = "Post<br>Crawford";
+    } else if (s1 == mp || s2 == mp) {
+      const leader = (s1 == mp) ? 1 : 2;
+      if (this.cfplayer != leader) {
+        //leaderがmatch pointに到達した直後 → Crawfordゲーム開始
+        this.cfplayer = leader; this.crawford = 1;
+      } else if (this.crawford == 1 && delta > 0 && player != leader) {
+        //Crawfordゲーム中にリードされている側が得点 → Post Crawfordへ
+        //(「−」による訂正ではCrawfordのまま変えない)
+        this.crawford = 0;
+      }
+      cfstr = this.crawford ? "Crawford" : "Post<br>Crawford";
     } else {
-      this.crawford = 0; this.cfplayer = 0;
-      cfstr = "";
+      this.crawford = 0; this.cfplayer = 0; //誰もmatch pointにいない
     }
     document.querySelector("#crawfordinfo").innerHTML = cfstr;
   }
@@ -143,20 +152,21 @@ class bgScoreAppSvg {
     const player = parseInt(evt.currentTarget.id.slice(-1));
     const domid = "score" + player;
     const afterscore = minmaxfunc(this.score[player] + delta, 0, 99);
-    this.showScore(domid, this.score[player], afterscore);
+    const beforescore = this.score[player];
+    this.showScore(domid, beforescore, afterscore);
     this.score[player] = afterscore;
-    this.checkCrawford(player);
+    this.checkCrawford(player, afterscore - beforescore); //0点/99点の上限で変化しなかったときは0
   }
 
   showScore(domid, beforescore, afterscore) {
     if (beforescore == afterscore) {
       this.showStaticScore(domid, afterscore);
     } else {
-      this.showAnimatationScore(domid, beforescore, afterscore);
+      this.showAnimationScore(domid, beforescore, afterscore);
     }
   }
 
-  showAnimatationScore(domid, beforescore, afterscore) {
+  showAnimationScore(domid, beforescore, afterscore) {
     const divtag = document.getElementById(domid);
     divtag.innerHTML = "";
 
@@ -171,25 +181,22 @@ class bgScoreAppSvg {
     if (this.fonttype == "odo") {
       if (beforescore == 9 && afterscore == 10) {
         this.showStaticScore(domid, afterscore);
-        //this.fontWorker.showAnimatationScoreDigitAppearing(divtag, bfonesdigit, afonesdigit, aftensdigit);
+        //this.fontWorker.showAnimationScore9to10(divtag, bfonesdigit, afonesdigit, aftensdigit);
         return;
       }
       if (beforescore == 10 && afterscore == 9) {
         this.showStaticScore(domid, afterscore);
-        //this.fontWorker.showAnimatationScoreDigitDisappearing(divtag, bfonesdigit, afonesdigit, bftensdigit);
+        //this.fontWorker.showAnimationScoreDigit10to9(divtag, bfonesdigit, afonesdigit, bftensdigit);
         return;
       }
     }
 
     if (afterscore >= 10) {
-      const svgten = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      svgten.setAttribute("viewBox", "0 0 50 90");
-      svgten.setAttribute("width", this.scorefontsize);
-
-      const alwaysAnimateTens = (this.fonttype == "flip");
+      const attr = {"viewBox": "0 0 50 90", "width": this.scorefontsize};
+      const svgten = this.createSvgElement("svg", attr);
 
       //10の位をアニメーションするのは10の位が変わるときとflipのとき
-      if (bftensdigit !== aftensdigit || alwaysAnimateTens) {
+      if (bftensdigit !== aftensdigit || this.fonttype == "flip") {
         this.createAnimationPolygon(svgten, bftensdigit, aftensdigit);
       } else {
         this.createStaticPolygon(svgten, aftensdigit);
@@ -197,9 +204,8 @@ class bgScoreAppSvg {
       divtag.appendChild(svgten);
     }
 
-    const svgone = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgone.setAttribute("viewBox", "0 0 50 90");
-    svgone.setAttribute("width", this.scorefontsize);
+    const attr = {"viewBox": "0 0 50 90", "width": this.scorefontsize};
+    const svgone = this.createSvgElement("svg", attr);
 
     this.createAnimationPolygon(svgone, bfonesdigit, afonesdigit);
     divtag.appendChild(svgone);
@@ -226,18 +232,24 @@ class bgScoreAppSvg {
     const width = matchinfoflag ? "4vmax" : this.scorefontsize;
 
     if (num >= 10) {
-      const innersvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      innersvg.setAttribute("viewBox", "0 0 50 90");
-      innersvg.setAttribute("width", width);
-      const polygon = this.createStaticPolygon(innersvg, tensdigit);
+      const attr = {"viewBox": "0 0 50 90", "width": width};
+      const innersvg = this.createSvgElement("svg", attr);
+      this.createStaticPolygon(innersvg, tensdigit);
       divtag.appendChild(innersvg);
     }
 
-    const innersvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    innersvg.setAttribute("viewBox", "0 0 50 90");
-    innersvg.setAttribute("width", width);
-    const polygon = this.createStaticPolygon(innersvg, onesdigit);
+    const attr = {"viewBox": "0 0 50 90", "width": width};
+    const innersvg = this.createSvgElement("svg", attr);
+    this.createStaticPolygon(innersvg, onesdigit);
     divtag.appendChild(innersvg);
+  }
+
+  createSvgElement(name, attr) {
+    const svgEl = document.createElementNS("http://www.w3.org/2000/svg", name);
+    for (const [key, value] of Object.entries(attr)) {
+      svgEl.setAttribute(key, value);
+    }
+    return svgEl;
   }
 
   createStaticPolygon(svg, digit) {

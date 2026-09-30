@@ -27,39 +27,38 @@ class HandWrite {
     const d = this.getHandwriteGlyphPathData(digit);
     if (!d) { return; }
 
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", d);
-    path.setAttribute("fill", "none");
-    path.setAttribute("stroke", this.parent.getFillColor());
-    path.setAttribute("stroke-width", this.handwriteStrokeWidth);
-    path.setAttribute("stroke-linecap", "round");
-    path.setAttribute("stroke-linejoin", "round");
+    const attr = {"d": d,
+                  "fill": "none",
+                  "stroke": this.parent.getFillColor(),
+                  "stroke-width": this.handwriteStrokeWidth,
+                  "stroke-linecap": "round",
+                  "stroke-linejoin": "round"};
+    const path = this.parent.createSvgElement("path", attr);
     svg.appendChild(path);
   }
 
   createAnimationHandwrite(svg, before, after) {
-    const svgNS = "http://www.w3.org/2000/svg";
 
     const buildStrokePath = (d) => {
-      const path = document.createElementNS(svgNS, "path");
-      path.setAttribute("d", d);
-      path.setAttribute("fill", "none");
-      path.setAttribute("stroke", this.parent.getFillColor());
-      path.setAttribute("stroke-width", this.handwriteStrokeWidth);
-      path.setAttribute("stroke-linecap", "round");
-      path.setAttribute("stroke-linejoin", "round");
+      const attr = {"d": d,
+                    "fill": "none",
+                    "stroke": this.parent.getFillColor(),
+                    "stroke-width": this.handwriteStrokeWidth,
+                    "stroke-linecap": "round",
+                    "stroke-linejoin": "round"};
+      const path = this.parent.createSvgElement("path", attr);
       return path;
     };
 
     const addDashAnimation = (path, from, to, dur, begin, onComplete) => {
-      const animate = document.createElementNS(svgNS, "animate");
-      animate.setAttribute("attributeName", "stroke-dashoffset");
-      animate.setAttribute("from", from);
-      animate.setAttribute("to", to);
-      animate.setAttribute("begin", begin);
-      animate.setAttribute("dur", dur);
-      animate.setAttribute("repeatCount", "1");
-      animate.setAttribute("fill", "freeze");
+      const attr = {"attributeName": "stroke-dashoffset",
+                    "from": from,
+                    "to": to,
+                    "begin": begin,
+                    "dur": dur,
+                    "repeatCount": "1",
+                    "fill": "freeze"};
+      const animate = this.parent.createSvgElement("animate", attr);
       if (onComplete) {
         animate.addEventListener("endEvent", onComplete, { once: true });
       }

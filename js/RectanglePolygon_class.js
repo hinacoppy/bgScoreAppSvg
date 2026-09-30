@@ -17,10 +17,9 @@ class RectanglePolygon {
 
   //矩形数字画像のSVGオブジェクトを生成
   createStaticRectangle(svg, digit) {
-    const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
     const points = this.getPolygonPoints(digit);
-    polygon.setAttribute("points", points);
-    polygon.setAttribute("fill", this.parent.getFillColor());
+    const attr = {"points": points, "fill": this.parent.getFillColor()};
+    const polygon = this.parent.createSvgElement("polygon", attr);
     svg.appendChild(polygon);
   }
 
@@ -42,16 +41,16 @@ class RectanglePolygon {
       topoints = this.getPolygonPoints(bfafkey);
       frpoints = this.getPolygonPoints(afbfkey);
     }
-    const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-    polygon.setAttribute("points", topoints);
-    polygon.setAttribute("fill", this.parent.getFillColor());
+    const attr1 = {"points": topoints, "fill": this.parent.getFillColor()};
+    const polygon = this.parent.createSvgElement("polygon", attr1);
 
-    const animate = document.createElementNS("http://www.w3.org/2000/svg", "animate");
-    animate.setAttribute("attributeName", "points");
-    animate.setAttribute("repeatCount", "1");
-    animate.setAttribute("dur", this.animationspeed);
-    animate.setAttribute("from", frpoints);
-    animate.setAttribute("to", topoints);
+    const attr2 = {"attributeName": "points",
+                   "repeatCount": "1",
+                   "dur": this.animationspeed,
+                   "from": frpoints,
+                   "to": topoints,
+                 };
+    const animate = this.parent.createSvgElement("animate", attr2);
 
     polygon.appendChild(animate);
     svg.appendChild(polygon);

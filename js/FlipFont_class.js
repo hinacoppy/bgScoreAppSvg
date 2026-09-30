@@ -4,7 +4,6 @@
 class FlipFont {
   constructor(parent) {
     this.parent = parent;
-    this.animationspeed = "0.3s";
     this.animspeedhalf = "0.2s"; //flipfontのときのアニメーションスピード
   }
 
@@ -21,9 +20,8 @@ class FlipFont {
     const d = this.getPathDataFlipFont(digit);
     if (!d) { return; }
 
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", d);
-    path.setAttribute("fill", this.parent.getFillColor());
+    const attr = {"d": d, "fill": this.parent.getFillColor()};
+    const path = this.parent.createSvgElement("path", attr);
     svg.appendChild(path);
   }
 
@@ -52,31 +50,30 @@ class FlipFont {
   //transformは子から順に適用されるため、下から読むと
   //「中央に原点を移動→Y方向スケール→原点を戻す」という順で効く
   buildScaleGroup(pathData, fromScale, toScale, beginTime) {
-    const svgNS = "http://www.w3.org/2000/svg";
     const center = 45; //シュリンク/エクスパンドの基準線(y座標)
 
-    const outerGroup = document.createElementNS(svgNS, "g");
-    outerGroup.setAttribute("transform", `translate(0,${center})`);
+    const attr1 = {"transform": `translate(0,${center})`};
+    const outerGroup = this.parent.createSvgElement("g", attr1);
 
-    const scaleGroup = document.createElementNS(svgNS, "g");
-    scaleGroup.setAttribute("transform", `scale(1,${fromScale})`); //基準値=このフェーズのアニメーション開始前の状態
+    const attr2 = {"transform": `scale(1,${fromScale})`}; //基準値=このフェーズのアニメーション開始前の状態
+    const scaleGroup = this.parent.createSvgElement("g", attr2);
 
-    const animateTransform = document.createElementNS(svgNS, "animateTransform");
-    animateTransform.setAttribute("attributeName", "transform");
-    animateTransform.setAttribute("type", "scale");
-    animateTransform.setAttribute("from", `1 ${fromScale}`);
-    animateTransform.setAttribute("to", `1 ${toScale}`);
-    animateTransform.setAttribute("begin", beginTime);
-    animateTransform.setAttribute("dur", this.animspeedhalf);
-    animateTransform.setAttribute("repeatCount", "1");
-    animateTransform.setAttribute("fill", "freeze");
+    const attr3 = {"attributeName": "transform",
+                   "type": "scale",
+                   "from": `1 ${fromScale}`,
+                   "to": `1 ${toScale}`,
+                   "begin": beginTime,
+                   "dur": this.animspeedhalf,
+                   "repeatCount": "1",
+                   "fill": "freeze"
+                  };
+    const animateTransform = this.parent.createSvgElement("animateTransform", attr3);
     scaleGroup.appendChild(animateTransform);
 
-    const innerGroup = document.createElementNS(svgNS, "g");
-    innerGroup.setAttribute("transform", `translate(0,${-center})`);
-    const path = document.createElementNS(svgNS, "path");
-    path.setAttribute("d", pathData);
-    path.setAttribute("fill", this.parent.getFillColor());
+    const attr4 = {"transform": `translate(0,${-center})`};
+    const innerGroup = this.parent.createSvgElement("g", attr4);
+    const attr5 = {"d": pathData, "fill": this.parent.getFillColor()};
+    const path = this.parent.createSvgElement("path", attr5);
     innerGroup.appendChild(path);
 
     scaleGroup.appendChild(innerGroup);

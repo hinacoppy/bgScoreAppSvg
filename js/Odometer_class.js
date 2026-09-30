@@ -22,9 +22,8 @@ class Odometer {
     const d = this.getOdometerGlyphPathData(digit);
     if (!d) { return; }
 
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("d", d);
-    path.setAttribute("fill", this.parent.getFillColor());
+    const attr = {"d": d, "fill": this.parent.getFillColor()};
+    const path = this.parent.createSvgElement("path", attr);
     svg.appendChild(path);
   }
 
@@ -50,34 +49,32 @@ class Odometer {
   //topDigit/bottomDigitの2コマ分のストリップを作り、1コマ(90unit)ぶんだけ縦にロールさせる。
   //fromRatio/toRatioは0(topDigitを表示)→1(bottomDigitを表示)の位置を表す。
   buildOdometerRollGroup(topDigit, bottomDigit, fromRatio, toRatio) {
-    const svgNS = "http://www.w3.org/2000/svg";
-    const group = document.createElementNS(svgNS, "g");
-    group.setAttribute("transform", `translate(0,${-90 * fromRatio})`); //アニメーション開始前の基準状態
+    const attr1 = {"transform": `translate(0,${-90 * fromRatio})`}; //アニメーション開始前の基準状態
+    const group = this.parent.createSvgElement("g", attr1);
 
     const appendGlyph = (digit, rowIndex) => {
       if (digit === null) { return; } //桁なし(数字が存在しない状態)は何も描かない
       const d = this.getOdometerGlyphPathData(digit);
       if (!d) { return; }
 
-      const rowGroup = document.createElementNS(svgNS, "g");
-      rowGroup.setAttribute("transform", `translate(0,${90 * rowIndex})`);
-      const path = document.createElementNS(svgNS, "path");
-      path.setAttribute("d", d);
-      path.setAttribute("fill", this.parent.getFillColor());
+      const attr2 = {"transform": `translate(0,${90 * rowIndex})`};
+      const rowGroup = this.parent.createSvgElement("g", attr2);
+      const attr3 = {"d": d, "fill": this.parent.getFillColor()};
+      const path = this.parent.createSvgElement("path", attr3);
       rowGroup.appendChild(path);
       group.appendChild(rowGroup);
     };
     appendGlyph(topDigit, 0);
     appendGlyph(bottomDigit, 1);
 
-    const animateTransform = document.createElementNS(svgNS, "animateTransform");
-    animateTransform.setAttribute("attributeName", "transform");
-    animateTransform.setAttribute("type", "translate");
-    animateTransform.setAttribute("from", `0 ${-90 * fromRatio}`);
-    animateTransform.setAttribute("to", `0 ${-90 * toRatio}`);
-    animateTransform.setAttribute("dur", this.animationspeed);
-    animateTransform.setAttribute("repeatCount", "1");
-    animateTransform.setAttribute("fill", "freeze");
+    const attr4 = {"attributeName": "transform",
+                   "type": "translate",
+                   "from": `0 ${-90 * fromRatio}`,
+                   "to": `0 ${-90 * toRatio}`,
+                   "dur": this.animationspeed,
+                   "repeatCount": "1",
+                   "fill": "freeze"};
+    const animateTransform = this.parent.createSvgElement("animateTransform", attr4);
     group.appendChild(animateTransform);
 
     return group;
@@ -118,21 +115,30 @@ class Odometer {
   //こうすることでフォント側のアニメーションが使うviewBox内のクリップ領域とは独立して動かせるため、
   //数字が途中で欠けて見えることもない)
   addSvgShiftAnimation(svg, fromPx, toPx, dur, onComplete) {
-    const svgNS = "http://www.w3.org/2000/svg";
+    //const svgNS = "http://www.w3.org/2000/svg";
     svg.setAttribute("transform", `translate(${fromPx},0)`);
 
-    const animateTransform = document.createElementNS(svgNS, "animateTransform");
-    animateTransform.setAttribute("attributeName", "transform");
-    animateTransform.setAttribute("type", "translate");
-    animateTransform.setAttribute("from", `${fromPx} 0`);
-    animateTransform.setAttribute("to", `${toPx} 0`);
+    //const animateTransform = document.createElementNS(svgNS, "animateTransform");
+    //animateTransform.setAttribute("attributeName", "transform");
+    //animateTransform.setAttribute("type", "translate");
+    //animateTransform.setAttribute("from", `${fromPx} 0`);
+    //animateTransform.setAttribute("to", `${toPx} 0`);
     //begin="indefinite" + beginElement()で明示的に開始する。
     //(挿入から時間が経ったsvgに後から追加するケースがあり、暗黙のbegin="0s"だと
     //SVGドキュメントのタイムライン基準で解釈され、挿入直後扱いにならないことがあるため)
-    animateTransform.setAttribute("begin", "indefinite");
-    animateTransform.setAttribute("dur", dur);
-    animateTransform.setAttribute("repeatCount", "1");
-    animateTransform.setAttribute("fill", "freeze");
+    //animateTransform.setAttribute("begin", "indefinite");
+    //animateTransform.setAttribute("dur", dur);
+    //animateTransform.setAttribute("repeatCount", "1");
+    //animateTransform.setAttribute("fill", "freeze");
+    const attr = {"attributeName": "transform",
+                  "type": "translate",
+                  "from": `${fromPx} 0`,
+                  "to": `${toPx} 0`,
+                  "begin": "indefinite", //上記コメント参照
+                  "dur": dur,
+                  "repeatCount": "1",
+                  "fill": "freeze"};
+    const animateTransform = this.parent.createSvgElement("animateTransform", attr);
     if (onComplete) {
       animateTransform.addEventListener("endEvent", () => {
         //fill="freeze"されたSMILアニメーションは終了後も値を上書きし続け、setAttributeで書き換えても
@@ -147,24 +153,28 @@ class Odometer {
     animateTransform.beginElement();
   }
 
-  //桁が新たに出現する場合(9→10など)専用のアニメーション。
+  //桁が新たに出現する場合(9→10)専用のアニメーション。
   //1の位は「単独中央表示だった位置」から「2桁表示時の位置」へまず横方向にスライドし、
   //スライドが終わってからフォント本来の桁アニメーション(モーフ/ロール等)を開始する。
   //横方向のスライドとフォント本来のアニメーションを同時に動かすと、並進ベースのアニメーション
   //(Odometerのロールや、FlipFontの拡大縮小)では斜めに動いて見えてしまうため、順番に再生する。
-  showAnimatationScoreDigitAppearing(divtag, bfonesdigit, afonesdigit, aftensdigit) {
+  showAnimationScore9to10(divtag, bfonesdigit, afonesdigit, aftensdigit) {
     divtag.innerHTML = "";
     const shiftDurMs = parseFloat(this.digitShiftDuration) * 1000;
 
-    const svgten = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgten.setAttribute("viewBox", "0 0 50 90");
-    svgten.setAttribute("width", this.parent.scorefontsize);
+    //const svgten = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    //svgten.setAttribute("viewBox", "0 0 50 90");
+    //svgten.setAttribute("width", this.parent.scorefontsize);
+    const attr1 = {"viewBox": "0 0 50 90", "width": this.parent.scorefontsize};
+    const svgten = this.parent.createSvgElement("svg", attr1);
     this.parent.createAnimationPolygon(svgten, null, aftensdigit);
     divtag.appendChild(svgten);
 
-    const svgone = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgone.setAttribute("viewBox", "0 0 50 90");
-    svgone.setAttribute("width", this.parent.scorefontsize);
+    //const svgone = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    //svgone.setAttribute("viewBox", "0 0 50 90");
+    //svgone.setAttribute("width", this.parent.scorefontsize);
+    const attr2 = {"viewBox": "0 0 50 90", "width": this.parent.scorefontsize};
+    const svgone = this.parent.createSvgElement("svg", attr2);
     this.parent.createStaticPolygon(svgone, bfonesdigit); //スライドが終わるまでは元の数字を静止表示しておく
     divtag.appendChild(svgone);
 
@@ -183,22 +193,26 @@ class Odometer {
     divtag.offsetHeight; //ブラウザのレイアウトエンジンにレンダリング確定を強制
   }
 
-  //桁が消える場合(10→9など)専用のアニメーション。
+  //桁が消える場合(10→9)専用のアニメーション。
   //1の位はまず現在の2桁表示時の位置のままフォント本来のアニメーションを再生し、
   //それが終わってから10の位を取り除きつつ、1の位を単独中央表示の位置へ横方向にスライドさせる。
-  showAnimatationScoreDigitDisappearing(divtag, bfonesdigit, afonesdigit, bftensdigit) {
+  showAnimationScoreDigit10to9(divtag, bfonesdigit, afonesdigit, bftensdigit) {
     divtag.innerHTML = "";
     const rollDurMs = parseFloat(this.animationspeed) * 1000;
 
-    const svgten = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgten.setAttribute("viewBox", "0 0 50 90");
-    svgten.setAttribute("width", this.parent.scorefontsize);
+    //const svgten = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    //svgten.setAttribute("viewBox", "0 0 50 90");
+    //svgten.setAttribute("width", this.parent.scorefontsize);
+    const attr1 = {"viewBox": "0 0 50 90", "width": this.parent.scorefontsize};
+    const svgten = this.parent.createSvgElement("svg", attr1);
     this.parent.createStaticPolygon(svgten, bftensdigit); //消える10の位はアニメーションさせず元の見た目のまま表示しておく
     divtag.appendChild(svgten);
 
-    const svgone = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svgone.setAttribute("viewBox", "0 0 50 90");
-    svgone.setAttribute("width", this.parent.scorefontsize);
+    //const svgone = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    //svgone.setAttribute("viewBox", "0 0 50 90");
+    //svgone.setAttribute("width", this.parent.scorefontsize);
+    const attr2 = {"viewBox": "0 0 50 90", "width": this.parent.scorefontsize};
+    const svgone = this.parent.createSvgElement("svg", attr2);
     this.parent.createAnimationPolygon(svgone, bfonesdigit, afonesdigit);
     divtag.appendChild(svgone);
 

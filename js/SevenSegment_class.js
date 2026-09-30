@@ -22,9 +22,8 @@ class SevenSegment {
 
     // それぞれのセグメントを独立したポリゴンとして描画
     for (const points of Object.values(segmentMap)) {
-      const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      polygon.setAttribute("points", points);
-      polygon.setAttribute("fill", this.parent.getFillColor());
+      const attr = {"points": points, "fill": this.parent.getFillColor()};
+      const polygon = this.parent.createSvgElement("polygon", attr);
       svg.appendChild(polygon);
     }
   }
@@ -43,16 +42,15 @@ class SevenSegment {
       const from = beforeMap[seg] || degenerate;
       const to = afterMap[seg] || degenerate;
 
-      const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
-      polygon.setAttribute("points", to);
-      polygon.setAttribute("fill", this.parent.getFillColor());
+      const attr1 = {"points": to, "fill": this.parent.getFillColor()};
+      const polygon = this.parent.createSvgElement("polygon", attr1);
 
-      const animate = document.createElementNS("http://www.w3.org/2000/svg", "animate");
-      animate.setAttribute("attributeName", "points");
-      animate.setAttribute("repeatCount", "1");
-      animate.setAttribute("dur", this.animationspeed);
-      animate.setAttribute("from", from);
-      animate.setAttribute("to", to);
+      const attr2 = {"attributeName": "points",
+                     "repeatCount": "1",
+                     "dur": this.animationspeed,
+                     "from": from,
+                     "to": to};
+      const animate = this.parent.createSvgElement("animate", attr2);
 
       polygon.appendChild(animate);
       svg.appendChild(polygon);

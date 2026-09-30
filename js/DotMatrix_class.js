@@ -24,12 +24,12 @@ class DotMatrix {
     for (let r = 0; r < rows.length; r++) {
       for (let c = 0; c < cols.length; c++) {
         const on = pattern[r][c] == "1";
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", cols[c]);
-        circle.setAttribute("cy", rows[r]);
-        circle.setAttribute("r", radius);
-        circle.setAttribute("fill", this.parent.getFillColor());
-        circle.setAttribute("opacity", on ? onOpacity : offOpacity);
+        const attr = {"cx": cols[c],
+                      "cy": rows[r],
+                      "r": radius,
+                      "fill": this.parent.getFillColor(),
+                      "opacity": on ? onOpacity : offOpacity};
+        const circle = this.parent.createSvgElement("circle", attr);
         svg.appendChild(circle);
       }
     }
@@ -48,20 +48,20 @@ class DotMatrix {
         const fromOpacity = beforeOn ? onOpacity : offOpacity;
         const toOpacity = afterOn ? onOpacity : offOpacity;
 
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", cols[c]);
-        circle.setAttribute("cy", rows[r]);
-        circle.setAttribute("r", radius);
-        circle.setAttribute("fill", this.parent.getFillColor());
-        circle.setAttribute("opacity", toOpacity);
+        const attr1 = {"cx": cols[c],
+                       "cy": rows[r],
+                       "r": radius,
+                       "fill": this.parent.getFillColor(),
+                       "opacity": toOpacity};
+        const circle = this.parent.createSvgElement("circle", attr1);
 
         if (beforeOn != afterOn) { //点灯状態が変化するドットだけopacityをアニメーションさせる
-          const animate = document.createElementNS("http://www.w3.org/2000/svg", "animate");
-          animate.setAttribute("attributeName", "opacity");
-          animate.setAttribute("repeatCount", "1");
-          animate.setAttribute("dur", this.animationspeed);
-          animate.setAttribute("from", fromOpacity);
-          animate.setAttribute("to", toOpacity);
+          const attr2 = {"attributeName": "opacity",
+                         "repeatCount": "1",
+                         "dur": this.animationspeed,
+                         "from": fromOpacity,
+                         "to": toOpacity};
+          const animate = this.parent.createSvgElement("animate", attr2);
           circle.appendChild(animate);
         }
         svg.appendChild(circle);
