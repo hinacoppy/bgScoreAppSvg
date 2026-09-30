@@ -12,6 +12,7 @@ class bgScoreAppSvg {
     this.settingWindowFlag = false;
     this.settingVars = {}; //設定内容を保持するオブジェクト
     this.fontWorker = this.makeFontWorker(fonttype);
+    this.svgfillcolor = getComputedStyle(document.body).getPropertyValue("--svg-fill-color").trim();
     this.setEventHandler();
     this.resetScore();
   }
@@ -85,7 +86,7 @@ class bgScoreAppSvg {
   }
 
   getFillColor() {
-    return getComputedStyle(document.body).getPropertyValue("--svg-fill-color").trim();
+    return this.svgfillcolor;
   }
 
   showHideSettingPanel(showflag = true) {
