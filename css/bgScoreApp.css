@@ -96,7 +96,8 @@ body{
   background-color:var(--btn-bg);
 }
 svg{
-  padding:5px;
+  /*padding:5px;*/
+  margin:5px; /* paddingだとSafari(iOS)ではpadding領域までクリップ範囲に含まれ、オドメーターのロール時に前後の数字が5px分はみ出して見えるため、marginに変更 */
   overflow:hidden; /* 桁の増減・オドメーターのロール時、1コマ分の表示領域からはみ出す部分を隠す */
 }
 .scorecontainer{
