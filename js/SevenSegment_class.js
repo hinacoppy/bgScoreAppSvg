@@ -4,6 +4,7 @@
 class SevenSegment {
   constructor(parent) {
     this.parent = parent;
+    this.svgfillcolor = parent.svgfillcolor;
     this.animationspeed = "0.3s";
   }
 
@@ -22,7 +23,7 @@ class SevenSegment {
 
     // それぞれのセグメントを独立したポリゴンとして描画
     for (const points of Object.values(segmentMap)) {
-      const attr = {"points": points, "fill": this.parent.getFillColor()};
+      const attr = {"points": points, "fill": this.svgfillcolor};
       const polygon = this.parent.createSvgElement("polygon", attr);
       svg.appendChild(polygon);
     }
@@ -42,7 +43,7 @@ class SevenSegment {
       const from = beforeMap[seg] || degenerate;
       const to = afterMap[seg] || degenerate;
 
-      const attr1 = {"points": to, "fill": this.parent.getFillColor()};
+      const attr1 = {"points": to, "fill": this.svgfillcolor};
       const polygon = this.parent.createSvgElement("polygon", attr1);
 
       const attr2 = {"attributeName": "points",

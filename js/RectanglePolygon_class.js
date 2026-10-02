@@ -4,6 +4,7 @@
 class RectanglePolygon {
   constructor(parent) {
     this.parent = parent;
+    this.svgfillcolor = parent.svgfillcolor;
     this.animationspeed = "0.3s";
   }
 
@@ -18,7 +19,7 @@ class RectanglePolygon {
   //矩形数字画像のSVGオブジェクトを生成
   createStaticRectangle(svg, digit) {
     const points = this.getPolygonPoints(digit);
-    const attr = {"points": points, "fill": this.parent.getFillColor()};
+    const attr = {"points": points, "fill": this.svgfillcolor};
     const polygon = this.parent.createSvgElement("polygon", attr);
     svg.appendChild(polygon);
   }
@@ -41,7 +42,7 @@ class RectanglePolygon {
       topoints = this.getPolygonPoints(bfafkey);
       frpoints = this.getPolygonPoints(afbfkey);
     }
-    const attr1 = {"points": topoints, "fill": this.parent.getFillColor()};
+    const attr1 = {"points": topoints, "fill": this.svgfillcolor};
     const polygon = this.parent.createSvgElement("polygon", attr1);
 
     const attr2 = {"attributeName": "points",
@@ -54,6 +55,16 @@ class RectanglePolygon {
 
     polygon.appendChild(animate);
     svg.appendChild(polygon);
+  }
+
+  //桁が出現/消失するアニメーション用に、中心の1点に収縮した状態のpoints文字列を生成する
+  //(頂点数を対応する数字と揃えることで、from/toの頂点数が一致し滑らかにモーフする)
+  getBlankRectanglePoints(count) {
+    return Array(count).fill("25,45").join(" ");
+  }
+
+  countRectanglePoints(pointsStr) {
+    return pointsStr.trim().split(/\s+/).length;
   }
 
   getPolygonPoints(keystr) {
@@ -94,16 +105,6 @@ class RectanglePolygon {
       "1and0": "0,0   0,90 50,90 50,0 10,0 10,10 40,10 40,80 10,80 10,0",
     };
     return pointlist[keystr.toString()]; //数字でアクセスしてもOKとなるようにしておく
-  }
-
-  //桁が出現/消失するアニメーション用に、中心の1点に収縮した状態のpoints文字列を生成する
-  //(頂点数を対応する数字と揃えることで、from/toの頂点数が一致し滑らかにモーフする)
-  getBlankRectanglePoints(count) {
-    return Array(count).fill("25,45").join(" ");
-  }
-
-  countRectanglePoints(pointsStr) {
-    return pointsStr.trim().split(/\s+/).length;
   }
 
 }

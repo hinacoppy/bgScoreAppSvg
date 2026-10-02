@@ -4,6 +4,7 @@
 class DotMatrix {
   constructor(parent) {
     this.parent = parent;
+    this.svgfillcolor = parent.svgfillcolor;
     this.animationspeed = "0.3s";
   }
 
@@ -27,7 +28,7 @@ class DotMatrix {
         const attr = {"cx": cols[c],
                       "cy": rows[r],
                       "r": radius,
-                      "fill": this.parent.getFillColor(),
+                      "fill": this.svgfillcolor,
                       "opacity": on ? onOpacity : offOpacity};
         const circle = this.parent.createSvgElement("circle", attr);
         svg.appendChild(circle);
@@ -51,7 +52,7 @@ class DotMatrix {
         const attr1 = {"cx": cols[c],
                        "cy": rows[r],
                        "r": radius,
-                       "fill": this.parent.getFillColor(),
+                       "fill": this.svgfillcolor,
                        "opacity": toOpacity};
         const circle = this.parent.createSvgElement("circle", attr1);
 
