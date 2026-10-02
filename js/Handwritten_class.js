@@ -1,9 +1,10 @@
-/***** Handwrite (Chalkboard / Marker draw-on) ************************************************/
+/***** Handwritten (Chalkboard / Marker draw-on) ************************************************/
 "use strict";
 
-class HandWrite {
+class Handwritten {
   constructor(parent) {
     this.parent = parent;
+    this.svgfillcolor = parent.svgfillcolor;
     this.handwriteDrawSpeed = "0.3s"; //handwriteフォントで数字を描くアニメーションの時間
     this.handwriteEraseSpeed = "0.2s"; //handwriteフォントで数字を消すアニメーションの時間
     this.handwriteStrokeWidth = 4.0; //handwriteフォントの線の太さ(viewBoxのuser unit)
@@ -29,7 +30,7 @@ class HandWrite {
 
     const attr = {"d": d,
                   "fill": "none",
-                  "stroke": this.parent.getFillColor(),
+                  "stroke": this.svgfillcolor,
                   "stroke-width": this.handwriteStrokeWidth,
                   "stroke-linecap": "round",
                   "stroke-linejoin": "round"};
@@ -42,7 +43,7 @@ class HandWrite {
     const buildStrokePath = (d) => {
       const attr = {"d": d,
                     "fill": "none",
-                    "stroke": this.parent.getFillColor(),
+                    "stroke": this.svgfillcolor,
                     "stroke-width": this.handwriteStrokeWidth,
                     "stroke-linecap": "round",
                     "stroke-linejoin": "round"};
@@ -88,13 +89,39 @@ class HandWrite {
         const len = path.getTotalLength();
         path.setAttribute("stroke-dasharray", len);
         path.setAttribute("stroke-dashoffset", len); //基準値=描く前(未描画)
-        //消す工程がある場合は、それが終わるタイミングから描き始める
-        const beginTime = before !== null ? this.handwriteEraseSpeed : "0s";
-        addDashAnimation(path, len, 0, this.handwriteDrawSpeed, beginTime);
+        //常に消す工程の時間分だけ描き始めを遅らせる(この桁に消す工程が無い場合=桁が出現する場合でも、
+        //他の桁の消す工程が終わってから描き始めるように、タイミングを揃えるため)
+        addDashAnimation(path, len, 0, this.handwriteDrawSpeed, this.handwriteEraseSpeed);
       }
     }
   }
 
+  //9→10 専用のアニメーション。
+  //元の「9」は単独中央表示だった位置(=2桁の中央)のまま消え、その後「10」が2桁表示時の位置で描かれる。
+  showAnimationScore9to10(divtag, beforescore, afterscore) {
+    const [bftensdigit, bfonesdigit, aftensdigit, afonesdigit] = this.parent.splitScoreToDigit(beforescore, afterscore);
+    this.parent.playTwoDigitFrameAnimation(divtag, afterscore, this.totalAnimMs(),
+                                           svg => this.createAnimationHandwrite(svg, null, aftensdigit),  //null→1: 描く
+                                           svg => this.createAnimationHandwrite(svg, null, afonesdigit),  //null→0: 描く
+                                           svg => this.createAnimationHandwrite(svg, bfonesdigit, null)); //9→null: 中央で消す
+  }
+
+  //10→9 専用のアニメーション。
+  //元の「10」は2桁表示のまま消え、その後「9」が単独中央表示の位置で描かれる。
+  showAnimationScore10to9(divtag, beforescore, afterscore) {
+    const [bftensdigit, bfonesdigit, aftensdigit, afonesdigit] = this.parent.splitScoreToDigit(beforescore, afterscore);
+    this.parent.playTwoDigitFrameAnimation(divtag, afterscore, this.totalAnimMs(),
+                                           svg => this.createAnimationHandwrite(svg, bftensdigit, null),  //1→null: 消す
+                                           svg => this.createAnimationHandwrite(svg, bfonesdigit, null),  //0→null: 消す
+                                           svg => this.createAnimationHandwrite(svg, null, afonesdigit)); //null→9: 描く
+  }
+
+  //消す→描くの2段階分の所要時間(ms)
+  totalAnimMs() {
+    return (parseFloat(this.handwriteEraseSpeed) + parseFloat(this.handwriteDrawSpeed)) * 1000;
+  }
+
+  //将来別のフォントに差し替える場合は、このメソッドの中身を差し替える
   getHandwriteGlyphPathData(digit) {
     return this.getPathDataPatrickHand(digit);
   }
