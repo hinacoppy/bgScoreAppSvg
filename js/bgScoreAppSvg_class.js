@@ -8,11 +8,12 @@ class bgScoreAppSvg {
     this.score = [0, 0, 0];
     this.crawford = 0;
     this.cfplayer = 0;
+    this.matchfontsize = "4vmax";
     this.scorefontsize = "15vmax";
     this.settingWindowFlag = false;
     this.settingVars = {}; //設定内容を保持するオブジェクト
-    this.fontWorker = this.makeFontWorker(fonttype);
     this.svgfillcolor = getComputedStyle(document.body).getPropertyValue("--svg-fill-color").trim();
+    this.fontWorker = this.makeFontWorker(fonttype);
     this.setEventHandler();
     this.resetScore();
   }
@@ -30,7 +31,7 @@ class bgScoreAppSvg {
     case "odo":
       return new Odometer(this);
     case "hand":
-      return new HandWrite(this);
+      return new Handwritten(this);
     default:
       alert("Unknown font type " + fonttype);
     }
@@ -83,10 +84,6 @@ class bgScoreAppSvg {
 
   loadSettingVars() {
     document.querySelector("#matchlength").value = this.settingVars.matchlength;
-  }
-
-  getFillColor() {
-    return this.svgfillcolor;
   }
 
   showHideSettingPanel(showflag = true) {
@@ -159,6 +156,14 @@ class bgScoreAppSvg {
     this.checkCrawford(player, afterscore - beforescore); //0点/99点の上限で変化しなかったときは0
   }
 
+  splitScoreToDigit(beforescore, afterscore) {
+    const bfonesdigit = beforescore % 10;
+    const afonesdigit = afterscore % 10;
+    const bftensdigit = beforescore >= 10 ? Math.floor(beforescore / 10) : null;
+    const aftensdigit = afterscore >= 10 ? Math.floor(afterscore / 10) : null;
+    return [bftensdigit, bfonesdigit, aftensdigit, afonesdigit];
+  }
+
   showScore(domid, beforescore, afterscore) {
     if (beforescore == afterscore) {
       this.showStaticScore(domid, afterscore);
@@ -168,26 +173,19 @@ class bgScoreAppSvg {
   }
 
   showAnimationScore(domid, beforescore, afterscore) {
+    const [bftensdigit, bfonesdigit, aftensdigit, afonesdigit] = this.splitScoreToDigit(beforescore, afterscore);
     const divtag = document.getElementById(domid);
     divtag.innerHTML = "";
 
-    const bfonesdigit = beforescore % 10;
-    const afonesdigit = afterscore % 10;
-    const bftensdigit = beforescore >= 10 ? Math.floor(beforescore / 10) : null;
-    const aftensdigit = afterscore >= 10 ? Math.floor(afterscore / 10) : null;
-
     //桁数が変化する場合(9→10, 10→9)は専用の処理で実行
-    //専用処理に分岐するのはodometerのときだけ
-    //色々試行錯誤したが、結局アニメーションしないことで対応
-    if (this.fonttype == "odo") {
+    //専用処理に分岐するのは odometer, flipfont, handwrite のときだけ
+    if (this.fonttype == "odo" || this.fonttype == "flip" || this.fonttype == "hand") {
       if (beforescore == 9 && afterscore == 10) {
-        this.showStaticScore(domid, afterscore);
-        //this.fontWorker.showAnimationScore9to10(divtag, bfonesdigit, afonesdigit, aftensdigit);
+        this.fontWorker.showAnimationScore9to10(divtag, beforescore, afterscore);
         return;
       }
       if (beforescore == 10 && afterscore == 9) {
-        this.showStaticScore(domid, afterscore);
-        //this.fontWorker.showAnimationScoreDigit10to9(divtag, bfonesdigit, afonesdigit, bftensdigit);
+        this.fontWorker.showAnimationScore10to9(divtag, beforescore, afterscore);
         return;
       }
     }
@@ -215,6 +213,51 @@ class bgScoreAppSvg {
     //offsetHeight プロパティを読み取ることで、レイアウト計算がスケジュール待ちではなく同期実行される
   }
 
+  //桁数が変わる(9⇔10)ときの共通アニメーション。
+  //flip/handwriteなど、古い数字が消えて空白になってから新しい数字が現れるフォント向け。
+  //2桁分の枠(10の位・1の位の2つのsvg)と、その中央に重ねた1つのsvgの3か所について、
+  //それぞれのsvgに対してdrawTens/drawOnes/drawCenter(svg)を呼んでアニメーションを組み立て、
+  //totalMs後に静的表示へ置き換える。アニメーションの中身(before/afterの扱いなど)はフォント側が決める。
+  //中央のsvgは桁が1つだけのときの表示位置と一致するため、横に動かさずに1桁⇔2桁を表現できる。
+  playTwoDigitFrameAnimation(divtag, finalscore, totalMs, drawTensFn, drawOnesFn, drawCenterFn) {
+    divtag.innerHTML = "";
+
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.position = "relative";
+
+    const attr = {"viewBox": "0 0 50 90", "width": this.scorefontsize};
+    const svgten = this.createSvgElement("svg", attr);
+    drawTensFn(svgten);
+    wrapper.appendChild(svgten);
+
+    const svgone = this.createSvgElement("svg", attr);
+    drawOnesFn(svgone);
+    wrapper.appendChild(svgone);
+
+    const svgcenter = this.createSvgElement("svg", attr);
+    drawCenterFn(svgcenter);
+    svgcenter.style.position = "absolute";
+    svgcenter.style.top = "0";
+    svgcenter.style.left = "50%";
+    wrapper.appendChild(svgcenter);
+
+    divtag.appendChild(wrapper);
+
+    //実測幅から中央配置のオフセットを決める(縦のmargin 5pxはcssのsvg指定と同じ)
+    const halfWidthPx = svgone.getBoundingClientRect().width / 2;
+    svgcenter.style.margin = `5px 0 0 ${-halfWidthPx}px`;
+
+    //アニメーション終了後に静的表示へ置き換える(その間に別のアニメーションで差し替えられていたら何もしない)
+    setTimeout(() => {
+      if (wrapper.parentNode !== divtag) { return; }
+      divtag.innerHTML = "";
+      this.createStaticSvg(divtag, finalscore);
+    }, totalMs + 50);
+
+    divtag.offsetHeight; //ブラウザのレイアウトエンジンにレンダリング確定を強制
+  }
+
   showStaticScore(domid, score) {
     const divtag = document.getElementById(domid);
     divtag.innerHTML = "";
@@ -230,7 +273,7 @@ class bgScoreAppSvg {
   createStaticSvg(divtag, num, matchinfoflag = false) {
     const onesdigit = (matchinfoflag && num == 0) ? "$" : num % 10;
     const tensdigit = Math.floor(num / 10);
-    const width = matchinfoflag ? "4vmax" : this.scorefontsize;
+    const width = matchinfoflag ? this.matchfontsize : this.scorefontsize;
 
     if (num >= 10) {
       const attr = {"viewBox": "0 0 50 90", "width": width};

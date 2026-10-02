@@ -4,6 +4,7 @@
 class FlipFont {
   constructor(parent) {
     this.parent = parent;
+    this.svgfillcolor = parent.svgfillcolor;
     this.animspeedhalf = "0.2s"; //flipfontのときのアニメーションスピード
   }
 
@@ -20,7 +21,7 @@ class FlipFont {
     const d = this.getPathDataFlipFont(digit);
     if (!d) { return; }
 
-    const attr = {"d": d, "fill": this.parent.getFillColor()};
+    const attr = {"d": d, "fill": this.svgfillcolor};
     const path = this.parent.createSvgElement("path", attr);
     svg.appendChild(path);
   }
@@ -72,7 +73,7 @@ class FlipFont {
 
     const attr4 = {"transform": `translate(0,${-center})`};
     const innerGroup = this.parent.createSvgElement("g", attr4);
-    const attr5 = {"d": pathData, "fill": this.parent.getFillColor()};
+    const attr5 = {"d": pathData, "fill": this.svgfillcolor};
     const path = this.parent.createSvgElement("path", attr5);
     innerGroup.appendChild(path);
 
@@ -81,9 +82,40 @@ class FlipFont {
     return outerGroup;
   }
 
+  //9→10 専用のアニメーション。
+  //元の「9」は単独中央表示だった位置(=2桁の中央)のままシュリンクして消え、
+  //その後「10」が2桁表示時の本来の位置でエクスパンドして現れる。桁の横移動は行わない。
+  showAnimationScore9to10(divtag, beforescore, afterscore) {
+    const [bftensdigit, bfonesdigit, aftensdigit, afonesdigit] = this.parent.splitScoreToDigit(beforescore, afterscore);
+    this.parent.playTwoDigitFrameAnimation(divtag, afterscore, this.totalAnimMs(),
+                                           svg => this.createAnimationFlipFont(svg, null, aftensdigit),  //null→1: エクスパンド
+                                           svg => this.createAnimationFlipFont(svg, null, afonesdigit),  //null→0: エクスパンド
+                                           svg => this.createAnimationFlipFont(svg, bfonesdigit, null)); //9→null: 中央でシュリンク
+  }
+
+  //10→9 専用のアニメーション。
+  //元の「10」は2桁表示のままシュリンクして消え、その後「9」が単独中央表示の位置でエクスパンドして現れる。
+  showAnimationScore10to9(divtag, beforescore, afterscore) {
+    const [bftensdigit, bfonesdigit, aftensdigit, afonesdigit] = this.parent.splitScoreToDigit(beforescore, afterscore);
+    this.parent.playTwoDigitFrameAnimation(divtag, afterscore, this.totalAnimMs(),
+                                           svg => this.createAnimationFlipFont(svg, bftensdigit, null),  //1→null: シュリンク
+                                           svg => this.createAnimationFlipFont(svg, bfonesdigit, null),  //0→null: シュリンク
+                                           svg => this.createAnimationFlipFont(svg, null, afonesdigit)); //null→9: 中央でエクスパンド
+  }
+
+  //シュリンク+エクスパンドの2段階分の所要時間(ms)
+  totalAnimMs() {
+    return parseFloat(this.animspeedhalf) * 2 * 1000;
+  }
+
+  //将来別のフォントに差し替える場合は、このメソッドの中身を差し替える
+  getPathDataFlipFont(keystr) {
+    return this.getPathDataAntonFont(keystr);
+  }
+
   //flipfont専用のSVGフォント(Anton, SIL Open Font License 1.1。ライセンス全文はfonts/anton/OFL.txt参照)の
   //グリフアウトラインをpath d属性として定義したもの。viewBox "0 0 50 90"に収まるよう正規化済み。
-  getPathDataFlipFont(keystr) {
+  getPathDataAntonFont(keystr) {
     const pathlist = {
       "0": "M25 89.55Q13.89 89.55 7.84 83.33Q1.79 77.1 1.79 65.4V25.85Q1.79 13.5 7.54 6.9Q13.3 0.3 25 0.3Q36.75 0.3 42.48 6.9Q48.21 13.5 48.21 25.85V65.4Q48.21 77.1 42.18 83.33Q36.16 89.55 25 89.55ZM25 73.41Q27.04 73.41 28.19 71.57Q29.33 69.73 29.33 67.44V24.16Q29.33 21.07 28.66 18.75Q27.99 16.44 25 16.44Q22.01 16.44 21.34 18.75Q20.67 21.07 20.67 24.16V67.44Q20.67 69.73 21.84 71.57Q23.01 73.41 25 73.41Z",
       "1": "M21.14 88.75V21.22Q19.35 23.36 16.21 24.68Q13.07 26 10.28 26V12Q12.92 11.6 15.96 10.29Q19 8.97 21.61 6.65Q24.23 4.33 25.62 1.05H39.72V88.75Z",

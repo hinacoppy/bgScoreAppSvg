@@ -2,7 +2,7 @@
 // (参考) https://developer.mozilla.org/ja/docs/Web/Progressive_web_apps/Offline_Service_workers
 'use strict';
 
-const cacheName = 'bgScoreAppSvg-v20260930b';
+const cacheName = 'bgScoreAppSvg-v20261002';
 const ORIGIN = location.origin; //ポート番号を含むorigin(LAN内IP:ポートなどでも動作させる)
 
 const contentToCache = [
@@ -21,7 +21,7 @@ const contentToCache = [
   ORIGIN + '/bgScoreAppSvg/js/DotMatrix_class.js',
   ORIGIN + '/bgScoreAppSvg/js/FlipFont_class.js',
   ORIGIN + '/bgScoreAppSvg/js/Odometer_class.js',
-  ORIGIN + '/bgScoreAppSvg/js/HandWrite_class.js',
+  ORIGIN + '/bgScoreAppSvg/js/Handwritten_class.js',
   ORIGIN + '/bgScoreAppSvg/manifest-7seg.json',
   ORIGIN + '/bgScoreAppSvg/manifest-rect.json',
   ORIGIN + '/bgScoreAppSvg/manifest-dot.json',

@@ -4,8 +4,8 @@
 class Odometer {
   constructor(parent) {
     this.parent = parent;
+    this.svgfillcolor = parent.svgfillcolor;
     this.animationspeed = "0.3s";
-    this.digitShiftDuration = "0.15s"; //桁数変化時、1の位を中央⇔2桁時の位置へ横方向にスライドさせる時間
   }
 
   createStaticPolygon(svg, digit) {
@@ -22,20 +22,32 @@ class Odometer {
     const d = this.getOdometerGlyphPathData(digit);
     if (!d) { return; }
 
-    const attr = {"d": d, "fill": this.parent.getFillColor()};
+    const attr = {"d": d, "fill": this.svgfillcolor};
     const path = this.parent.createSvgElement("path", attr);
     svg.appendChild(path);
   }
 
   //ones/tensいずれの桁も、値が変わるときは必ず隣接値(mod10で+1/-1、9→0や0→9の繰り上がり/繰り下がりを含む)
   //になるため、before/afterの前後関係だけでロール方向を判定できる。
-  createAnimationOdometer(svg, before, after) {
-    if (before === null) {
-      //桁が新たに出現する場合(9→10など): 下から数字がせり上がってくる
-      svg.appendChild(this.buildOdometerRollGroup(null, after, 0, 1));
+  //before/afterのどちらかがnull(桁が出現/消滅する)の場合は、隣接値からロール方向を決められないため、
+  //directionで全体のロール方向を指定する("up": 全体が上へ動く、"down": 全体が下へ動く)。
+  //省略時は、出現なら下からせり上がり("up")、消滅なら下へ流れ落ち("down")。
+  createAnimationOdometer(svg, before, after, direction) {
+    if (before === null || after === null) {
+      const dir = direction || (before === null ? "up" : "down");
+      let group;
+      if (before === null) {
+        group = (dir === "up") ? this.buildOdometerRollGroup(null, after, 0, 1)  //下からせり上がる
+                               : this.buildOdometerRollGroup(after, null, 1, 0); //上から降りてくる
+      } else {
+        group = (dir === "up") ? this.buildOdometerRollGroup(before, null, 0, 1)  //上へ消える
+                               : this.buildOdometerRollGroup(before, null, 0, -1); //下へ消える
+      }
+      svg.appendChild(group);
       return;
     }
 
+    //before, after が両方ともnullでないとき
     const isIncrement = (after === (before + 1) % 10);
     if (isIncrement) {
       //増加: 現在の数字(上)から次の数字(下)へロールし、下から現れる
@@ -59,7 +71,7 @@ class Odometer {
 
       const attr2 = {"transform": `translate(0,${90 * rowIndex})`};
       const rowGroup = this.parent.createSvgElement("g", attr2);
-      const attr3 = {"d": d, "fill": this.parent.getFillColor()};
+      const attr3 = {"d": d, "fill": this.svgfillcolor};
       const path = this.parent.createSvgElement("path", attr3);
       rowGroup.appendChild(path);
       group.appendChild(rowGroup);
@@ -80,8 +92,36 @@ class Odometer {
     return group;
   }
 
-  //グリフの実体(パスデータ)はgetOdometerGlyphPathData()経由でのみ取得する。
-  //将来別のフォントに差し替える場合は、このメソッドの中身を差し替えるだけでよい。
+  //9→10 専用のアニメーション。
+  //「10」は2桁表示時の本来の位置で下からせり上がり、
+  //元の「9」は単独中央表示だった位置(=2桁の中央)に静止したまま、同じ速度で上方向へ消えていく。
+  showAnimationScore9to10(divtag, beforescore, afterscore) {
+    const [bftensdigit, bfonesdigit, aftensdigit, afonesdigit] = this.parent.splitScoreToDigit(beforescore, afterscore);
+    //10の位: null→1、1の位: null→0 は下からせり上がり、中央: 9→null は上へ消える
+    this.parent.playTwoDigitFrameAnimation(divtag, afterscore, this.totalAnimMs(),
+                                           svg => this.createAnimationOdometer(svg, null, aftensdigit, "up"),
+                                           svg => this.createAnimationOdometer(svg, null, afonesdigit, "up"),
+                                           svg => this.createAnimationOdometer(svg, bfonesdigit, null, "up"));
+  }
+
+  //10→9 専用のアニメーション。
+  //元の「10」は2桁表示時の位置のまま下へ流れ落ち、
+  //新しい「9」は2桁の中央に乗った状態で上から降りてきて、そのまま単独中央表示の位置に収まる。
+  showAnimationScore10to9(divtag, beforescore, afterscore) {
+    const [bftensdigit, bfonesdigit, aftensdigit, afonesdigit] = this.parent.splitScoreToDigit(beforescore, afterscore);
+    //10の位: 1→null、1の位: 0→null は下へ流れ落ち、中央: null→9 は上から降りてくる
+    this.parent.playTwoDigitFrameAnimation(divtag, afterscore, this.totalAnimMs(),
+                                           svg => this.createAnimationOdometer(svg, bftensdigit, null, "down"),
+                                           svg => this.createAnimationOdometer(svg, bfonesdigit, null, "down"),
+                                           svg => this.createAnimationOdometer(svg, null, afonesdigit, "down"));
+  }
+
+  //ロール1回分の所要時間(ms)
+  totalAnimMs() {
+    return parseFloat(this.animationspeed) * 1000;
+  }
+
+  //将来別のフォントに差し替える場合は、このメソッドの中身を差し替える
   getOdometerGlyphPathData(digit) {
     return this.getPathDataAudiowide(digit);
   }
@@ -107,130 +147,6 @@ class Odometer {
       "$": "M44 45Q44 50.71 43.29 55.03Q42.58 59.36 41.41 62.58Q40.23 65.8 38.73 67.95Q37.23 70.1 35.65 71.39Q34.07 72.68 32.54 73.23Q31 73.78 29.74 73.78V89H20.26V73.78H10.74V59.48H29.66Q29.94 59.48 30.49 59.24Q31.04 58.99 31.68 58.22Q32.33 57.46 32.94 56.02Q33.55 54.57 33.95 52.18H10.74Q9.77 52.18 8.9 51.63Q8.03 51.08 7.4 50.12Q6.77 49.17 6.38 47.85Q6 46.53 6 45Q6 39.72 6.61 35.7Q7.22 31.68 8.19 28.71Q9.16 25.73 10.33 23.71Q11.51 21.68 12.64 20.39Q13.94 18.86 15.22 18.03Q16.49 17.2 17.53 16.8Q18.56 16.4 19.29 16.31Q20.02 16.22 20.26 16.22V1H29.74V16.22H39.26V30.58H20.34Q20.1 30.58 19.55 30.82Q19 31.07 18.36 31.81Q17.71 32.54 17.08 33.98Q16.45 35.43 16.05 37.82H39.26Q40.27 37.82 41.12 38.37Q41.97 38.92 42.62 39.91Q43.27 40.89 43.64 42.21Q44 43.53 44 45Z",
     };
     return pathlist[keystr.toString()];
-  }
-
-  //svg(ルート要素)自身にtranslateのanimateTransformを追加する。fromPx→toPxはCSS px単位。
-  //(このアプリの他のアニメーションはviewBox内の要素にSMILで座標をアニメーションさせているが、
-  //ルートのsvg要素自体を動かす場合はCSSのtransformではなくSVGのtransform属性として与える必要がある。
-  //こうすることでフォント側のアニメーションが使うviewBox内のクリップ領域とは独立して動かせるため、
-  //数字が途中で欠けて見えることもない)
-  addSvgShiftAnimation(svg, fromPx, toPx, dur, onComplete) {
-    //const svgNS = "http://www.w3.org/2000/svg";
-    svg.setAttribute("transform", `translate(${fromPx},0)`);
-
-    //const animateTransform = document.createElementNS(svgNS, "animateTransform");
-    //animateTransform.setAttribute("attributeName", "transform");
-    //animateTransform.setAttribute("type", "translate");
-    //animateTransform.setAttribute("from", `${fromPx} 0`);
-    //animateTransform.setAttribute("to", `${toPx} 0`);
-    //begin="indefinite" + beginElement()で明示的に開始する。
-    //(挿入から時間が経ったsvgに後から追加するケースがあり、暗黙のbegin="0s"だと
-    //SVGドキュメントのタイムライン基準で解釈され、挿入直後扱いにならないことがあるため)
-    //animateTransform.setAttribute("begin", "indefinite");
-    //animateTransform.setAttribute("dur", dur);
-    //animateTransform.setAttribute("repeatCount", "1");
-    //animateTransform.setAttribute("fill", "freeze");
-    const attr = {"attributeName": "transform",
-                  "type": "translate",
-                  "from": `${fromPx} 0`,
-                  "to": `${toPx} 0`,
-                  "begin": "indefinite", //上記コメント参照
-                  "dur": dur,
-                  "repeatCount": "1",
-                  "fill": "freeze"};
-    const animateTransform = this.parent.createSvgElement("animateTransform", attr);
-    if (onComplete) {
-      animateTransform.addEventListener("endEvent", () => {
-        //fill="freeze"されたSMILアニメーションは終了後も値を上書きし続け、setAttributeで書き換えても
-        //反映されない。ここではアニメーション要素自体を取り除いて上書きを解除する
-        //(その結果、svgのtransformは基準値であるtranslate(fromPx,0)に戻る。呼び出し側は、
-        //補正が不要になった時点のfromPxが0になるようfromPx/toPxを選ぶこと)
-        animateTransform.remove();
-        onComplete();
-      }, { once: true });
-    }
-    svg.appendChild(animateTransform);
-    animateTransform.beginElement();
-  }
-
-  //桁が新たに出現する場合(9→10)専用のアニメーション。
-  //1の位は「単独中央表示だった位置」から「2桁表示時の位置」へまず横方向にスライドし、
-  //スライドが終わってからフォント本来の桁アニメーション(モーフ/ロール等)を開始する。
-  //横方向のスライドとフォント本来のアニメーションを同時に動かすと、並進ベースのアニメーション
-  //(Odometerのロールや、FlipFontの拡大縮小)では斜めに動いて見えてしまうため、順番に再生する。
-  showAnimationScore9to10(divtag, bfonesdigit, afonesdigit, aftensdigit) {
-    divtag.innerHTML = "";
-    const shiftDurMs = parseFloat(this.digitShiftDuration) * 1000;
-
-    //const svgten = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    //svgten.setAttribute("viewBox", "0 0 50 90");
-    //svgten.setAttribute("width", this.parent.scorefontsize);
-    const attr1 = {"viewBox": "0 0 50 90", "width": this.parent.scorefontsize};
-    const svgten = this.parent.createSvgElement("svg", attr1);
-    this.parent.createAnimationPolygon(svgten, null, aftensdigit);
-    divtag.appendChild(svgten);
-
-    //const svgone = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    //svgone.setAttribute("viewBox", "0 0 50 90");
-    //svgone.setAttribute("width", this.parent.scorefontsize);
-    const attr2 = {"viewBox": "0 0 50 90", "width": this.parent.scorefontsize};
-    const svgone = this.parent.createSvgElement("svg", attr2);
-    this.parent.createStaticPolygon(svgone, bfonesdigit); //スライドが終わるまでは元の数字を静止表示しておく
-    divtag.appendChild(svgone);
-
-    //挿入後の実測幅の半分だけ左にずらした位置(=単独中央表示時の位置)から、
-    //2桁表示時の本来の位置(ズレ0)へスライドさせる
-    const halfWidthPx = svgone.getBoundingClientRect().width / 2;
-    this.addSvgShiftAnimation(svgone, -halfWidthPx, 0, this.digitShiftDuration);
-
-    setTimeout(() => {
-      svgone.innerHTML = "";
-      svgone.setAttribute("transform", "translate(0,0)");
-      this.parent.createAnimationPolygon(svgone, bfonesdigit, afonesdigit);
-      svgone.offsetHeight;
-    }, shiftDurMs);
-
-    divtag.offsetHeight; //ブラウザのレイアウトエンジンにレンダリング確定を強制
-  }
-
-  //桁が消える場合(10→9)専用のアニメーション。
-  //1の位はまず現在の2桁表示時の位置のままフォント本来のアニメーションを再生し、
-  //それが終わってから10の位を取り除きつつ、1の位を単独中央表示の位置へ横方向にスライドさせる。
-  showAnimationScoreDigit10to9(divtag, bfonesdigit, afonesdigit, bftensdigit) {
-    divtag.innerHTML = "";
-    const rollDurMs = parseFloat(this.animationspeed) * 1000;
-
-    //const svgten = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    //svgten.setAttribute("viewBox", "0 0 50 90");
-    //svgten.setAttribute("width", this.parent.scorefontsize);
-    const attr1 = {"viewBox": "0 0 50 90", "width": this.parent.scorefontsize};
-    const svgten = this.parent.createSvgElement("svg", attr1);
-    this.parent.createStaticPolygon(svgten, bftensdigit); //消える10の位はアニメーションさせず元の見た目のまま表示しておく
-    divtag.appendChild(svgten);
-
-    //const svgone = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    //svgone.setAttribute("viewBox", "0 0 50 90");
-    //svgone.setAttribute("width", this.parent.scorefontsize);
-    const attr2 = {"viewBox": "0 0 50 90", "width": this.parent.scorefontsize};
-    const svgone = this.parent.createSvgElement("svg", attr2);
-    this.parent.createAnimationPolygon(svgone, bfonesdigit, afonesdigit);
-    divtag.appendChild(svgone);
-
-    //挿入直後(このタイミング)で幅を実測しておく。setTimeoutの中で後から実測すると、
-    //直前に別の桁アニメーションを割り込みキャンセルした直後などにレイアウトが未確定のままの値を
-    //読んでしまうことがあるため
-    const halfWidthPx = svgone.getBoundingClientRect().width / 2;
-
-    setTimeout(() => {
-      //2桁表示時の位置(ズレ0)から、実測幅の半分だけ左にずらした位置(=単独中央表示時の位置)へスライドさせる
-      this.addSvgShiftAnimation(svgone, 0, -halfWidthPx, this.digitShiftDuration, () => {
-        //10の位を取り除くのと同時に、1の位のスライド効果を解除する。取り除いた瞬間、
-        //1の位は単独表示として自然に中央へ再配置されるため、この2つを同時に行うことで見た目の位置がズレない
-        svgten.remove();
-      });
-    }, rollDurMs);
-
-    divtag.offsetHeight; //ブラウザのレイアウトエンジンにレンダリング確定を強制
   }
 
 }
