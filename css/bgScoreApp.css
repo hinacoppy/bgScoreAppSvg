@@ -110,8 +110,8 @@ svg{
   background-color:var(--scorecontainer);
 }
 .minusbtn{
-  width:10vmin;
-  height:10vmin;
+  width:15vmin;
+  height:15vmin;
   justify-self:end; /* 右下 */
   align-self:end;
   margin:0 7vmin 7vmin 0;
@@ -140,20 +140,21 @@ svg{
 /* Theme Color Definition ------------------------------------- */
 :root{
   --svg-fill-color:  #036;
-  --btn-color:       #444;
-  --btn-bg:          #bbb;
-  --setting-bg-color:#ddd;
-  --setting-frame:   #444;
-  --setting-title:   #fff;
-  --setting-title-bg:#444;
-}
-:root-color{
   --btn-color:       #29f;
   --btn-bg:          #bef;
   --setting-bg-color:#dff;
   --setting-frame:   #33f;
   --setting-title:   #fff;
   --setting-title-bg:#29f;
+}
+:root-mono{
+  --svg-fill-color:  #036;
+  --btn-color:       #444;
+  --btn-bg:          #bbb;
+  --setting-bg-color:#ddd;
+  --setting-frame:   #444;
+  --setting-title:   #fff;
+  --setting-title-bg:#444;
 }
 .sevensegment{
   --body-bg-color:   #efe;
