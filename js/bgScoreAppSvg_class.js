@@ -2,23 +2,27 @@
 "use strict";
 
 class bgScoreAppSvg {
-  constructor(fonttype = "7seg") {
+  constructor(fonttype = "7seg", appmode = true) {
+    //appmode: bgScoreApp(T), bgclock(F)
     this.fonttype = fonttype;
     this.matchlen = 5;
     this.score = [0, 0, 0];
     this.crawford = 0;
     this.cfplayer = 0;
-    this.matchfontsize = "4vmax";
-    this.scorefontsize = "15vmax";
+    this.matchfontsize = appmode ? "4vmax" : "3vmax";
+    this.scorefontsize = appmode ? "15vmax" : "6vmax";
     this.settingWindowFlag = false;
     this.settingVars = {}; //設定内容を保持するオブジェクト
-    this.svgfillcolor = getComputedStyle(document.body).getPropertyValue("--svg-fill-color").trim();
     this.fontWorker = this.makeFontWorker(fonttype);
-    this.setEventHandler();
+    if (appmode) {
+      this.setEventHandler();
+    }
     this.resetScore();
   }
 
   makeFontWorker(fonttype) {
+    this.fonttype = fonttype;
+    this.svgfillcolor = getComputedStyle(document.body).getPropertyValue("--svg-fill-color").trim();
     switch (fonttype) {
     case "7seg":
       return new SevenSegment(this);
@@ -256,6 +260,12 @@ class bgScoreAppSvg {
     }, totalMs + 50);
 
     divtag.offsetHeight; //ブラウザのレイアウトエンジンにレンダリング確定を強制
+  }
+
+  showCurrentScore() {
+    this.showStaticScore("score1", this.score[1]);
+    this.showStaticScore("score2", this.score[2]);
+    this.showMatchLength("matchinfo", this.matchlen);
   }
 
   showStaticScore(domid, score) {
