@@ -121,16 +121,32 @@ svg{
 }
 /* Setting Window decorations ------------------------------------- */
 #settingwindow{
-  position:absolute;
-  top:0;
-  margin-top:5vmin;
   padding:2vmin 2vmax;
   font-size:2vmax;
   text-align:center;
+  color:inherit;
   border:3px solid var(--setting-frame);
   background-color:var(--setting-bg-color);
-  display: none;
 }
+#settingwindow::backdrop{
+  background-color:rgba(0,0,0,0.4);
+}
+@media screen and (orientation:portrait) {
+/* <dialog>はtop layerに描画され.articleのrotateが効かないため、自身を回転する */
+dialog#settingwindow{
+  /* 幅が画面幅を超えるとmargin:autoの中央寄せが効かないため、座標で中央に置いてから回転する */
+  inset:auto;
+  top:50%;
+  left:50%;
+  margin:0;
+  transform:translate(-50%,-50%) rotate(90deg);
+  /* 回転前のレイアウト幅は縦画面の狭い幅になり文字が折り返されるため、
+     内容なりの幅にして横画面と同じ折り返し・縦横比にする */
+  width:max-content;
+  max-width:100vmax;
+  max-height:100vmin;
+  overflow:auto;
+}}
 .settingtitle{
   padding:2vmin 2vmax;
   font-size:3vmax;

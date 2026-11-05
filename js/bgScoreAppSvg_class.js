@@ -11,7 +11,6 @@ class bgScoreAppSvg {
     this.cfplayer = 0;
     this.matchfontsize = appmode ? "4vmax" : "3vmax";
     this.scorefontsize = appmode ? "15vmax" : "6vmax";
-    this.settingWindowFlag = false;
     this.settingVars = {}; //設定内容を保持するオブジェクト
     this.fontWorker = this.makeFontWorker(fonttype);
     if (appmode) {
@@ -72,6 +71,12 @@ class bgScoreAppSvg {
       this.loadSettingVars(); //matchlengthを書き戻す
     });
 
+    //<dialog>がESCキーで閉じられたとき
+    const settingwindow = document.querySelector("#settingwindow");
+    settingwindow.addEventListener("cancel", () => {
+      this.loadSettingVars(); //matchlengthを書き戻す
+    });
+
     //メイン画面の[SETTINGS]ボタンがクリックされたとき
     const settingbtns = ["#settingbtn", "#matchinfo"]; //ポイント表示部分も設定ボタンとして機能させる
     for (const btn of settingbtns) {
@@ -91,14 +96,13 @@ class bgScoreAppSvg {
   }
 
   showHideSettingPanel(showflag = true) {
-    this.settingWindowFlag = showflag; //Show(showflag == true), Hide(false)
     const settingwindow = document.querySelector("#settingwindow");
     if (showflag) {
-      settingwindow.style.display = "block";
+      settingwindow.showModal();
     } else {
-      settingwindow.style.display = "none";
+      settingwindow.close();
     }
- }
+  }
 
   //設定画面でapplyした際に初期設定に戻す
   resetScore() {
@@ -148,8 +152,6 @@ class bgScoreAppSvg {
   }
 
   incdecScore(evt, delta) {
-    if (this.settingWindowFlag) { return; } //設定画面表示時はスコアは操作できない
-
     const minmaxfunc = (num, min, max) => { return Math.max(min, Math.min(num, max)); }
     const player = parseInt(evt.currentTarget.id.slice(-1));
     const domid = "score" + player;
