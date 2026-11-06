@@ -71,10 +71,10 @@ class bgScoreAppSvg {
       this.loadSettingVars(); //matchlengthを書き戻す
     });
 
-    //<dialog>がESCキーで閉じられたとき
+    //<dialog>をESCキーで閉じない
     const settingwindow = document.querySelector("#settingwindow");
-    settingwindow.addEventListener("cancel", () => {
-      this.loadSettingVars(); //matchlengthを書き戻す
+    settingwindow.addEventListener("cancel", (e) => {
+      e.preventDefault();
     });
 
     //メイン画面の[SETTINGS]ボタンがクリックされたとき
